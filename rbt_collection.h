@@ -164,6 +164,8 @@ RBTCollection<K,V>& RBTCollection<K,V>::operator=(const RBTCollection<K,V>& rhs)
       root->value = rhs.root->value;
       root->left = nullptr;
       root->right = nullptr;
+      root->parent = nullptr;
+      root->color = BLACK;
       node_count++; // increment node_count variable
       copy(root, rhs.root); // copy the rhs tree into the lhs tree
     }
@@ -221,6 +223,8 @@ void RBTCollection<K,V>::add(const K& a_key, const V& a_val){
 //  Outputs: None
 template<typename K, typename V>
 void RBTCollection<K,V>::remove(const K& a_key){
+  if(!root) return; // return if the list is empty
+
   // create sentinel Node
   Node* sentinel = new Node;
   sentinel->right = root;
@@ -282,14 +286,16 @@ void RBTCollection<K,V>::remove(const K& a_key){
   // case 2 - 2 children
   else{
     Node* s = x->right;
-    remove_rebalance(s,false);
+    remove_rebalance(s, false);
     // special case - successor is the node to the right of x
     if(!s->left){
       // copy the values of s into x
       x->key = s->key;
       x->value = s->value;
-      Node* tmp = x->right;
-      tmp->left = nullptr;
+      Node* tmp = s->right;
+      if(tmp) tmp->parent = s->parent;
+      if(s == s->parent->left) s->parent->left = tmp;
+      if(s == s->parent->right) s->parent->right = tmp;
       delete s; // delete successor
     }
     else{
@@ -407,7 +413,6 @@ size_t RBTCollection<K,V>::height() const{
 template<typename K, typename V>
 void RBTCollection<K,V>::make_empty(Node* subtree_root)
 {
-  /*
   // if the subtree root is null, return (base case)
   if(!subtree_root){
     return;
@@ -422,9 +427,9 @@ void RBTCollection<K,V>::make_empty(Node* subtree_root)
     subtree_root->right = nullptr;
   }
   // delete the current node
+  // if(subtree_root->parent) subtree_root->parent = nullptr;
   delete subtree_root;
   node_count--;
-  */
 }
 
 // helper function for copy constructor
@@ -441,9 +446,12 @@ void RBTCollection<K,V>::copy(Node* lhs_subtree_root, const Node* rhs_subtree_ro
     tmp->value = rhs_subtree_root->left->value;
     tmp->left = nullptr;
     tmp->right = nullptr;
+    tmp->parent = nullptr;
+    tmp->color = rhs_subtree_root->left->color;
 
     // add new Node to the left subtree of lhs_subtree_root
     lhs_subtree_root->left = tmp;
+    tmp->parent = lhs_subtree_root;
     node_count++; // increment node_count variable
 
     // copy the rest of the left subtree of rhs_subtree_root
@@ -452,15 +460,19 @@ void RBTCollection<K,V>::copy(Node* lhs_subtree_root, const Node* rhs_subtree_ro
 
   // copy right subtree over if it exists
   if(rhs_subtree_root->right){
+
     // new Node to copy to right subtree of lhs_subtree_root
     Node* tmp = new Node;
     tmp->key = rhs_subtree_root->right->key;
     tmp->value = rhs_subtree_root->right->value;
     tmp->left = nullptr;
     tmp->right = nullptr;
+    tmp->parent = nullptr;
+    tmp->color = rhs_subtree_root->right->color;
 
     // add new Node to the right subtree of lhs_subtree_root
     lhs_subtree_root->right = tmp;
+    tmp->parent = lhs_subtree_root;
     node_count++; // increment node_count variable
 
     // copy the rest of the right subtree of rhs_subtree_root

@@ -255,6 +255,8 @@ void create_pairs(pair<string,int>* array, size_t n)
 
 string get_ith_key(size_t i, size_t n)
 {
+  if(n==0)
+    return "";
   char letter[26];
   for (size_t i = 65; i <= 90; ++i)
     letter[i - 65] = i;
@@ -272,7 +274,10 @@ string get_ith_key(size_t i, size_t n)
     keys[i] = str;
     ++i1;
   }
-  return keys[i];
+  string r = keys[i];
+  delete [] keys;
+  return r;
+  // return keys[i];
 }
 
 

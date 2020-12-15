@@ -418,6 +418,71 @@ TEST(RBTCollectionTest, RemoveRebalanceCheckRightCases) {
   ASSERT_EQ(true, c4.valid_rbt());  
 }
 
+// Test 13 - Test add and height
+TEST(RBTCollectionTest, SimpleHeight) {
+  RBTCollection<string,int> c;
+  ASSERT_EQ(0, c.height());
+  c.add("b", 10);
+  ASSERT_EQ(1, c.height());
+  c.add("a", 20);
+  ASSERT_EQ(2, c.height());
+  c.add("c", 30);
+  ASSERT_EQ(2, c.height());
+  c.add("d", 40);
+  ASSERT_EQ(3, c.height());
+  ASSERT_EQ(true, c.valid_rbt());
+}
+
+// Test 14 - Test remove and height
+TEST(RBTCollectionTest, RemoveHeight) {
+  RBTCollection<string,int> c;
+  ASSERT_EQ(0, c.height());
+  c.add("b", 10);
+  ASSERT_EQ(1, c.height());
+  c.add("a", 20);
+  ASSERT_EQ(2, c.height());
+  c.add("c", 30);
+  ASSERT_EQ(2, c.height());
+  c.add("d", 40);
+  ASSERT_EQ(3, c.height());
+  ASSERT_EQ(true, c.valid_rbt());
+  c.remove("b");
+  ASSERT_EQ(2, c.height());
+  c.remove("c");
+  ASSERT_EQ(2, c.height());
+  c.remove("d");
+  ASSERT_EQ(1, c.height());
+  c.remove("a");
+  ASSERT_EQ(0, c.height());
+}
+
+// Test 15 - Test add, remove, and range
+TEST(RBTCollectionTest, RangeRemove) {
+  RBTCollection<string,int> c;
+  c.add("b", 10);
+  c.add("a", 20);
+  c.add("c", 30);
+  c.add("d", 40);
+  c.add("e", 50);
+  c.add("f", 60);
+  ASSERT_EQ(true, c.valid_rbt());
+  ArrayList<string> in_range1;
+  c.find("b", "e", in_range1);
+  ASSERT_EQ(4, in_range1.size());
+  ASSERT_EQ(true, member(string("b"), in_range1));
+  ASSERT_EQ(true, member(string("c"), in_range1));
+  ASSERT_EQ(true, member(string("d"), in_range1));
+  ASSERT_EQ(true, member(string("e"), in_range1));
+  ArrayList<string> in_range2;
+  c.remove("c");
+  c.find("b", "e", in_range2);
+  ASSERT_EQ(3, in_range2.size());
+  ASSERT_EQ(true, member(string("b"), in_range2));
+  ASSERT_EQ(false, member(string("c"), in_range2));
+  ASSERT_EQ(true, member(string("d"), in_range2));
+  ASSERT_EQ(true, member(string("e"), in_range2));
+}
+
 int main(int argc, char** argv)
 {
   testing::InitGoogleTest(&argc, argv);
